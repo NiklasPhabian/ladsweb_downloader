@@ -3,6 +3,8 @@ import csv
 import subprocess
 import xml.etree.ElementTree as ET
 import urllib
+import urllib2
+import wget
 import requests
 import time
 
@@ -36,15 +38,32 @@ class LadswebFile:
             value = child.text            
             self.properties[key] = value     
      
-    def download(self, folder):
-        file_path = folder + '/' + self.file_name
-        try:
-            urllib.request.urlretrieve(self.url, filename=file_path)            
-        except (urllib.error.HTTPError, urllib.error.ContentTooShortError) as e:
-            print('failed, trying again')
-            time.sleep(2)
-            download(folder)
+    def download_urllib1(self, file_path):
+        urllib.request.urlretrieve(self.url, filename=file_path)                        
             
+    def download_urllib2(self, file_path):
+        file_data = urllib2.urlopen(self.url)           
+        data = file_data.read()
+        with open(file_path, 'wb') as out_file:
+            out_file.write(data)
+            
+    def download_requests(self, file_path):
+        ret = request.get(self.url)
+        with open(file_path, 'wb') as out_file:
+            out_file.write(ret.contents)
+            
+    def download_wget(self, file_path):        
+        wget.download(self.url, file_path)
+        
+    def download(self, folder):
+        file_path = folder + '/' + self.file_name        
+        try:
+            self.download_wget(file_path)        
+        except :
+            print('download failed, trying again')
+            time.sleep(2)
+            self.download(folder)
+                    
     def delete(self, folder):
         os.remove(folder + self.file_name)
     
