@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--file_list', metavar='file_list', nargs='?', type=str, help='CSV to read urls/fileIDs from')
     parser.add_argument('--folder', metavar='folder', nargs='?', type=str, help='Destination folder', default='.')
     args = parser.parse_args()    
-    folder = os.path.expanduser(args.folder)         
+    folder = os.path.expanduser(args.folder + '/')         
     download(folder, args.file_list)
 
     
