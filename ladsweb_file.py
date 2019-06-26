@@ -3,7 +3,6 @@ import csv
 import subprocess
 import xml.etree.ElementTree as ET
 import urllib
-import urllib2
 import wget
 import requests
 import time
@@ -38,14 +37,8 @@ class LadswebFile:
             value = child.text            
             self.properties[key] = value     
      
-    def download_urllib1(self, file_path):
+    def download_urllib(self, file_path):
         urllib.request.urlretrieve(self.url, filename=file_path)                        
-            
-    def download_urllib2(self, file_path):
-        file_data = urllib2.urlopen(self.url)           
-        data = file_data.read()
-        with open(file_path, 'wb') as out_file:
-            out_file.write(data)
             
     def download_requests(self, file_path):
         ret = request.get(self.url)
