@@ -41,9 +41,9 @@ class LadswebFile:
         urllib.request.urlretrieve(self.url, filename=file_path)                        
             
     def download_requests(self, file_path):
-        ret = request.get(self.url)
+        ret = requests.get(self.url)
         with open(file_path, 'wb') as out_file:
-            out_file.write(ret.contents)
+            out_file.write(ret.content)
             
     def download_wget(self, file_path):        
         wget.download(self.url, file_path)
@@ -51,8 +51,9 @@ class LadswebFile:
     def download(self, folder):
         file_path = folder + '/' + self.file_name        
         try:
-            self.download_wget(file_path)        
-        except :
+            self.download_requests(file_path)        
+        except Exception as e:
+            print(e)
             print('download failed, trying again')
             time.sleep(2)
             self.download(folder)
