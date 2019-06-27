@@ -34,8 +34,13 @@ class LadswebFile:
     def get_properties(self):
         api = 'https://modwebsrv.modaps.eosdis.nasa.gov/axis2/services/MODAPSservices/getFileProperties?'
         query = 'fileIds={file_id}'.format(file_id=self.file_id)
-        ret = requests.get(api+query)
-        root = ET.fromstring(ret.text)
+        try:
+            ret = requests.get(api+query)
+            root = ET.fromstring(ret.text)
+        except xml.etree.ElementTree.ParseError:
+            print('cannot parse properties')
+            print(ret.status_code)
+            print(ret.text)
         for child in root[0]:
             key = child.tag.split('}')[1]
             value = child.text            
@@ -60,7 +65,7 @@ class LadswebFile:
         r = requests.get(self.url, headers=headers, stream=True) 
         return r.content        
     
-    def download_parallel(self, file_path, threads=16):        
+    def download_parallel(self, file_path, threads=4):        
         chunk_size = int(self.file_size() / threads ) + 1   
         ranges = []
         for start in range(0, self.file_size(), chunk_size):    
