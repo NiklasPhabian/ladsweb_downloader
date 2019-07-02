@@ -2,7 +2,6 @@ import requests
 import datetime
 import requests
 import argparse
-import json
 from eta import ETA
 from bbox import bbox
 
@@ -33,10 +32,10 @@ def get_urls(product, collection, start, stop, bbox):
                          north=bbox.north, south=bbox.south, west=bbox.west, east=bbox.east)
     print(host+api+query)
     ret = requests.get(host+api+query, headers={'X-Requested-With': 'XMLHttpRequest'}, timeout=600)        
-    urls = []
-    file_ids = ret.json().keys()
-    for file_id in file_ids:
-        url = host + ret.json()[file_id]['fileURL']
+    urls = []    
+    json_ret = ret.json()
+    for file_id in json_ret.keys():
+        url = host + json_ret[file_id]['fileURL']
         urls.append((file_id, url))
     return urls
     
