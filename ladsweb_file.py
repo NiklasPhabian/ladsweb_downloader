@@ -31,20 +31,26 @@ class LadswebFile:
         root = ET.fromstring(ret.text)
         self.url = root[0].text
              
-    def get_properties(self):
-        api = 'https://modwebsrv.modaps.eosdis.nasa.gov/axis2/services/MODAPSservices/getFileProperties?'
-        query = 'fileIds={file_id}'.format(file_id=self.file_id)
-        try:
-            ret = requests.get(api+query)
+    def get_properties(self):        
+        ret = self.download_properties()                    
+        try:            
             root = ET.fromstring(ret.text)
         except xml.etree.ElementTree.ParseError:
             print('cannot parse properties')
-            print(ret.status_code)
-            print(ret.text)
         for child in root[0]:
             key = child.tag.split('}')[1]
             value = child.text            
             self.properties[key] = value     
+            
+    def download_properties(self):
+        api = 'https://modwebsrv.modaps.eosdis.nasa.gov/axis2/services/MODAPSservices/getFileProperties?'
+        query = 'fileIds={file_id}'.format(file_id=self.file_id)
+        ret = requests.get(api+query)                
+        while not ret.status_code == 200:
+            print('{code} - failed to download properties. Retrying'.format(code=ret.status_code))
+            time.sleep(1)                            
+            ret = requests.get(api+query)            
+        return ret
             
     def get_header(self):
         r = requests.head(self.url) 
@@ -97,14 +103,10 @@ class LadswebFile:
             print('download failed, trying again')
             time.sleep(2)
             self.download(folder)
-<<<<<<< HEAD
-   
-=======
                     
     def delete(self):
         os.remove(self.file_path)
-    
->>>>>>> 0ce71531d0caf64eefeef39758485a6335110e0d
+
     def verified_download(self, folder):
         self.file_path = folder + '/' + self.file_name
         if not self.already_downloaded(folder):
@@ -112,22 +114,11 @@ class LadswebFile:
         while not self.checksum_is_correct():
             print('Checksums dont match. Retrying Download')
             time.sleep(1)
-<<<<<<< HEAD
-            self.delete(folder)            
-            self.verified_download(folder)
-
-    def delete(self, folder):
-        os.remove(folder + self.file_name)
-        
-    def checksum_is_correct(self, folder):
-        self.calc_checksum(folder)
-=======
             self.delete()            
-            self.download(folder)
+            self.download()
             
     def checksum_is_correct(self):
         self.calc_checksum()
->>>>>>> 0ce71531d0caf64eefeef39758485a6335110e0d
         checksum_local = self.checksum
         checksum_remote = int(self.properties['checksum'])        
         return checksum_local==checksum_remote

@@ -54,3 +54,7 @@ def files_modwebsrv(product, collection, start, stop, north, south, west, east, 
         eta.display(step='Getting URL for {}'.format(file_id))
         files.append(LadswebFile(file_id=file_id))                
     return files 
+
+
+if __name__ == '__main__':
+    get_file_ids('VNP46A', 
