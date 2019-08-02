@@ -2,6 +2,7 @@ import os
 import csv
 import subprocess
 import xml.etree.ElementTree as ET
+import xml
 import urllib
 import wget
 import requests
@@ -9,12 +10,11 @@ import time
 from multiprocessing.pool import Pool
 
 
-
-
 class LadswebFile:
     def __init__(self, file_id=None, url=None):
         self.file_id = file_id
         self.file_name = None
+        self.file_path = None
         if url is not None:
             self.url = url
         else:
@@ -65,7 +65,7 @@ class LadswebFile:
         r = requests.get(self.url, headers=headers, stream=True) 
         return r.content        
     
-    def download_parallel(self, file_path, threads=4):        
+    def download_parallel(self, threads=4):        
         chunk_size = int(self.file_size() / threads ) + 1   
         ranges = []
         for start in range(0, self.file_size(), chunk_size):    
@@ -73,56 +73,57 @@ class LadswebFile:
             ranges.append((start, end))
         with Pool(threads) as p:
             chunks = p.map(self.download_chunk_requests, ranges)
-        with open(file_path, 'wb') as out_file:
+        with open(self.file_path, 'wb') as out_file:
             for chunk in chunks:
                 out_file.write(chunk)    
      
-    def download_urllib(self, file_path):
-        urllib.request.urlretrieve(self.url, filename=file_path)                        
+    def download_urllib(self):
+        urllib.request.urlretrieve(self.url, filename=self.file_path)                        
             
-    def download_requests(self, file_path):
+    def download_requests(self):
         ret = requests.get(self.url)
-        with open(file_path, 'wb') as out_file:
+        with open(self.file_path, 'wb') as out_file:
             out_file.write(ret.content)
             
-    def download_wget(self, file_path):        
-        wget.download(self.url, file_path)
+    def download_wget(self):        
+        wget.download(self.url, self.file_path)
         
     def download(self, folder):
-        file_path = folder + '/' + self.file_name        
+        self.file_path = folder + '/' + self.file_name        
         try:
-            self.download_parallel(file_path)        
+            self.download_requests()        
         except Exception as e:
             print(e)
             print('download failed, trying again')
             time.sleep(2)
             self.download(folder)
                     
-    def delete(self, folder):
-        os.remove(folder + self.file_name)
+    def delete(self):
+        os.remove(self.file_path)
     
     def verified_download(self, folder):
+        self.file_path = folder + '/' + self.file_name
         if not self.already_downloaded(folder):
             self.download(folder)
-        if not self.checksum_is_correct(folder):
+        while not self.checksum_is_correct():
             print('Checksums dont match. Retrying Download')
             time.sleep(1)
-            self.delete(folder)            
-            self.verified_download(folder)
+            self.delete()            
+            self.download(folder)
             
-    def checksum_is_correct(self, folder):
-        self.calc_checksum(folder)
+    def checksum_is_correct(self):
+        self.calc_checksum()
         checksum_local = self.checksum
         checksum_remote = int(self.properties['checksum'])        
         return checksum_local==checksum_remote
         
-    def calc_checksum(self, folder):
-        ret = subprocess.check_output(['cksum', folder+self.file_name])        
+    def calc_checksum(self):
+        ret = subprocess.check_output(['cksum', self.file_path])        
         self.checksum = int(ret.split()[0])
         
     def already_downloaded(self, folder):
-        already_downloaded = os.path.isfile(folder + self.file_name)
-        if already_downloaded:
+        self.file_path = folder + '/' + self.file_name
+        if os.path.isfile(self.file_path):
             print('file already downloaded. Skipping')
             return True
         else:
