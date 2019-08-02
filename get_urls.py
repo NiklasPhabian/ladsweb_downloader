@@ -51,7 +51,7 @@ if __name__ == '__main__':
     parser.add_argument('--start', metavar='start', nargs='?', type=str, 
                         help='start date', default='2012-01-01')
     parser.add_argument('--stop', metavar='stop', nargs='?', type=str, 
-                        help='stop date', default='2019-06-01')
+                        help='stop date', default='2017-06-23')
     args = parser.parse_args()    
     
     

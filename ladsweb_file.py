@@ -9,8 +9,6 @@ import time
 from multiprocessing.pool import Pool
 
 
-
-
 class LadswebFile:
     def __init__(self, file_id=None, url=None):
         self.file_id = file_id
@@ -97,10 +95,7 @@ class LadswebFile:
             print('download failed, trying again')
             time.sleep(2)
             self.download(folder)
-                    
-    def delete(self, folder):
-        os.remove(folder + self.file_name)
-    
+   
     def verified_download(self, folder):
         if not self.already_downloaded(folder):
             self.download(folder)
@@ -109,7 +104,10 @@ class LadswebFile:
             time.sleep(1)
             self.delete(folder)            
             self.verified_download(folder)
-            
+
+    def delete(self, folder):
+        os.remove(folder + self.file_name)
+        
     def checksum_is_correct(self, folder):
         self.calc_checksum(folder)
         checksum_local = self.checksum
