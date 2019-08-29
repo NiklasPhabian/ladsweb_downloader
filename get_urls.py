@@ -1,9 +1,9 @@
 import requests
+import configparser
 import datetime
 import requests
 import argparse
 from eta import ETA
-from bbox import bbox
 
 def get_urls_long(product, collection, start, stop, bbox):
     # The api times out for ranges of more than a couple of months worth of tiles
@@ -29,9 +29,12 @@ def get_urls(product, collection, start, stop, bbox):
             'nightCoverage=true'
     query = query.format(product=product, collection=collection,
                          start=start, stop=stop,
-                         north=bbox.north, south=bbox.south, west=bbox.west, east=bbox.east)
+                         north=bbox['north'], south=bbox['south'], west=bbox['west'], east=bbox['east'])
     print(host+api+query)
-    ret = requests.get(host+api+query, headers={'X-Requested-With': 'XMLHttpRequest'}, timeout=600)        
+    ret = requests.get(host+api+query, headers={'X-Requested-With': 'XMLHttpRequest'}, timeout=600)   
+    if len(ret.json()) == 0:
+        print('empty response; flasely specified arguments?')
+        return []
     urls = []    
     json_ret = ret.json()
     for file_id in json_ret.keys():
@@ -41,20 +44,25 @@ def get_urls(product, collection, start, stop, bbox):
     
     
 if __name__ == '__main__':
+    bbox = configparser.ConfigParser()
+    bbox.read('bbox.config')
     parser = argparse.ArgumentParser(description='Downloads file list from Ladsweb')
     parser.add_argument('--product', metavar='product', nargs='?', type=str, 
-                        help='ladsweb product (e.g. VNP02DNB, VNP03DNB, CLDMSK_L2_VIIRS_SNPP)')
+                        help='ladsweb product (e.g. VNP02DNB, VNP03DNB, CLDMSK_L2_VIIRS_SNPP, VNP46A1)')
     parser.add_argument('--region', metavar='region', nargs='?', type=str, 
-                        help='region', choices=bbox.keys())
+                        help='region', choices=bbox.sections())
     parser.add_argument('--collection', metavar='collection', nargs='?', type=str, 
-                        help='ladsweb collection', default='5110')
+                        help='ladsweb collection (e.g. 5110, 5000)')
     parser.add_argument('--start', metavar='start', nargs='?', type=str, 
-                        help='start date', default='2012-01-01')
+                        help='start date (yyyy-mm-dd)', default='2019-04-01')
     parser.add_argument('--stop', metavar='stop', nargs='?', type=str, 
-                        help='stop date', default='2017-06-01')
+                        help='stop date (yyyy-mm-dd)', default='2019-09-01')
 
-    args = parser.parse_args()    
-    
+    args = parser.parse_args()   
+    if args.product is None or args.region is None or args.collection is None:
+        print('Wrong usage')
+        print(parser.print_help())
+        quit()
     
     urls = get_urls_long(product=args.product, 
                          collection=args.collection, 

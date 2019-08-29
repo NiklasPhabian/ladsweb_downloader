@@ -87,7 +87,7 @@ class LadswebFile:
         urllib.request.urlretrieve(self.url, filename=self.file_path)                        
             
     def download_requests(self):
-        ret = requests.get(self.url)
+        ret = requests.get(self.url, timeout=120)
         with open(self.file_path, 'wb') as out_file:
             out_file.write(ret.content)
             
@@ -115,7 +115,7 @@ class LadswebFile:
             print('Checksums dont match. Retrying Download')
             time.sleep(1)
             self.delete()            
-            self.download()
+            self.download(folder)
             
     def checksum_is_correct(self):
         self.calc_checksum()

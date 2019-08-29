@@ -1,4 +1,7 @@
+#!/usr/bin/python3
+
 import argparse
+import configparser
 import os
 from ladsweb_file import LadswebFile
 from eta import ETA
@@ -22,6 +25,12 @@ if __name__ == '__main__':
     parser.add_argument('--file_list', metavar='file_list', nargs='?', type=str, help='CSV to read urls/fileIDs from')
     parser.add_argument('--folder', metavar='folder', nargs='?', type=str, help='Destination folder', default='.')
     args = parser.parse_args()    
+
+    if args.file_list is None or args.folder is None:
+        print('Wrong usage')
+        print(parser.print_help())
+        quit()
+
     folder = os.path.expanduser(args.folder + '/')         
     download(folder, args.file_list)
 
