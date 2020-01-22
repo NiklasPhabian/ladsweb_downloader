@@ -50,7 +50,7 @@ if __name__ == '__main__':
     parser.add_argument('--product', metavar='product', nargs='?', type=str, 
                         help='ladsweb product (e.g. VNP02DNB, VNP03DNB, CLDMSK_L2_VIIRS_SNPP, VNP46A1)')
     parser.add_argument('--region', metavar='region', nargs='?', type=str, 
-                        help='region', choices=bbox.sections())
+                        help='region as specified in bbox.config', choices=bbox.sections())
     parser.add_argument('--collection', metavar='collection', nargs='?', type=str, 
                         help='ladsweb collection (e.g. 5110, 5000)')
     parser.add_argument('--start', metavar='start', nargs='?', type=str, 
