@@ -1,4 +1,5 @@
 import datetime
+import math
 
 class ETA():
     def __init__(self, n_tot):
@@ -18,9 +19,13 @@ class ETA():
     def display(self, step=None):
         self.n += 1       
         now = datetime.datetime.now().isoformat(sep=' ', timespec='seconds')
-        if step is not None:
-            message = '{now} {step} - ETA in {eta}'.format(now=now, step=step, eta=self.eta())
+        n_digits = math.ceil(math.log10(self.n_tot))
+        if step is not None:            
+            message = '{now} [{n:0{n_digits}d}/{n_tot}] {step} - ETA in {eta}'
+            message = message.format(n=self.n, n_digits=n_digits, n_tot=self.n_tot, now=now, step=step, eta=self.eta())
         else:
-            message = '{now} ETA in {eta}'.format(now=now, eta=self.eta())
+            message = '{now} [{n:0{n_digits}d}/{n_tot}] - ETA in {eta}'
+            message = message.format(n=self.n, n_digits=n_digits, n_tot=self.n_tot, now=now, eta=self.eta())
+        print('##############')
         print(message)
  

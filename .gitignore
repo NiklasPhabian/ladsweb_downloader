@@ -1,3 +1,4 @@
 *.csv 
 *.directory
 *__pycache__
+*.nc
