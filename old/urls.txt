@@ -1,0 +1,17 @@
+https://e4ftl01.cr.usgs.gov/
+
+#Earthdata
+https://lpdaacsvc.cr.usgs.gov/services
+ 
+# Near real time
+ftp://nrt3.modaps.eosdis.nasa.gov
+ 
+# 
+ftp://ladsweb.modaps.eosdis.nasa.gov
+https://ladsweb.modaps.eosdis.nasa.gov
+https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/6/MOD021KM/2017/234/MOD021KM.A2017234.1700.006.2017235013953.hdf
+ 
+ 
+
+ 
+ 
