@@ -30,11 +30,11 @@ def get_urls(product, collection, start, stop, bbox, day=True, night=False):
     query = 'product={product}&collection={collection}&'\
             'dateRanges={start}..{stop}&'\
             'areaOfInterest=x{west}y{north},x{east}y{south}&'\
-            'nightCoverage={night}&dayCoverage={day}'
+            'dayCoverage={day}&nightCoverage={night}'
     query = query.format(product=product, collection=collection,
                          start=start, stop=stop,
                          north=bbox['north'], south=bbox['south'], west=bbox['west'], east=bbox['east'],
-                         day=str(day), night=str(night))
+                         day=str(day).lower(), night=str(night).lower())
     print(host+api+query)
     ret = requests.get(host+api+query, headers={'X-Requested-With': 'XMLHttpRequest'}, timeout=600)   
     if ret.status_code!=200 or len(ret.json()) == 0:
