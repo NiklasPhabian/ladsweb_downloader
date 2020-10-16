@@ -1,9 +1,12 @@
+#!/usr/bin/python3
+
 import requests
 import configparser
 import datetime
 import requests
 import argparse
 from eta import ETA
+
 
 def get_urls_long(product, collection, start, stop, bbox):
     # The api times out for ranges of more than a couple of months worth of tiles
@@ -15,8 +18,8 @@ def get_urls_long(product, collection, start, stop, bbox):
     step = datetime.timedelta(days=100)
     while iterator + step < stop:
         urls += get_urls(product=product, collection=collection, start=iterator, stop=iterator+step, bbox=bbox)
-        iterator = iterator + step
-    urls += get_urls(product=product, collection=collection, start=iterator, stop=iterator+step, bbox=bbox)    
+        iterator += step
+    urls += get_urls(product=product, collection=collection, start=iterator, stop=stop, bbox=bbox)    
     return urls
 
 
@@ -49,10 +52,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Downloads file list from Ladsweb')
     parser.add_argument('--product', metavar='product', nargs='?', type=str, 
                         help='ladsweb product (e.g. VNP02DNB, VNP03DNB, CLDMSK_L2_VIIRS_SNPP, VNP46A1)')
-    parser.add_argument('--region', metavar='region', nargs='?', type=str, 
-                        help='region as specified in bbox.config', choices=bbox.sections())
     parser.add_argument('--collection', metavar='collection', nargs='?', type=str, 
                         help='ladsweb collection (e.g. 5110, 5000)')
+    parser.add_argument('--region', metavar='region', nargs='?', type=str, 
+                        help='region as specified in bbox.config', choices=bbox.sections())    
     parser.add_argument('--start', metavar='start', nargs='?', type=str, 
                         help='start date (yyyy-mm-dd)', default='2019-04-01')
     parser.add_argument('--stop', metavar='stop', nargs='?', type=str, 
@@ -69,7 +72,7 @@ if __name__ == '__main__':
                          start=args.start, stop=args.stop, 
                          bbox=bbox[args.region])
 
-    file_list_name = '{region}_{product}.csv'.format(region=args.region, product=args.product)
+    file_list_name = 'file_lists/{region}_{product}.csv'.format(region=args.region, product=args.product)
     with open(file_list_name, 'a') as files_log:        
         for row in urls:
             files_log.write(row[0] + ',' + row[1] + ',\n')         
