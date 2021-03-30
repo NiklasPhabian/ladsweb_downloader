@@ -5,6 +5,7 @@ import configparser
 import datetime
 import requests
 import argparse
+import time
 from eta import ETA
 
 
@@ -15,7 +16,7 @@ def get_urls_long(product, collection, start, stop, bbox, day, night):
     start = datetime.datetime.strptime(start, '%Y-%m-%d').date()
     stop = datetime.datetime.strptime(stop, '%Y-%m-%d').date()
     iterator = start    
-    step = datetime.timedelta(days=100)
+    step = datetime.timedelta(days=50)
     while iterator + step < stop:
         urls += get_urls(product=product, collection=collection, 
                          start=iterator, stop=iterator+step, bbox=bbox, day=day, night=night)
@@ -36,10 +37,23 @@ def get_urls(product, collection, start, stop, bbox, day=True, night=False):
                          north=bbox['north'], south=bbox['south'], west=bbox['west'], east=bbox['east'],
                          day=str(day).lower(), night=str(night).lower())
     print(host+api+query)
-    ret = requests.get(host+api+query, headers={'X-Requested-With': 'XMLHttpRequest'}, timeout=600)   
-    if ret.status_code!=200 or len(ret.json()) == 0:
-        print('empty response; flasely specified arguments?')
-        return []
+
+    success = False
+    n_tries = 0
+    while not success:
+        ret = requests.get(host+api+query, headers={'X-Requested-With': 'XMLHttpRequest'}, timeout=1200)   
+        if ret.status_code!=200 or len(ret.json()) == 0:
+            print('empty response; flasely specified arguments? timeout?')
+            print('Status Code: {}'.format(ret.status_code))
+            print('retrying')
+            time.sleep(1)
+            n_tries += 1
+            if n_try == 3:
+                print('tried 3 times; giving up')
+                return []            
+        else: 
+            success = True
+
     urls = []    
     json_ret = ret.json()
     for file_id in json_ret.keys():
@@ -64,7 +78,7 @@ if __name__ == '__main__':
                         help='stop date (yyyy-mm-dd)', default='2019-09-01')
     parser.add_argument('--day', dest='day', action='store_true')
     parser.add_argument('--night', dest='night', action='store_true')
-    parser.set_defaults(day=True)
+    parser.set_defaults(day=False)
     parser.set_defaults(night=False)
 
     args = parser.parse_args()   
