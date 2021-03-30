@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import argparse
-import configparser
 import os
 from ladsweb_file import LadswebFile
 from eta import ETA

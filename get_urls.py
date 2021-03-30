@@ -36,8 +36,8 @@ def get_urls(product, collection, start, stop, bbox, day=True, night=False):
                          start=start, stop=stop,
                          north=bbox['north'], south=bbox['south'], west=bbox['west'], east=bbox['east'],
                          day=str(day).lower(), night=str(night).lower())
-    print(host+api+query)
 
+    print(host+api+query)
     success = False
     n_tries = 0
     while not success:
