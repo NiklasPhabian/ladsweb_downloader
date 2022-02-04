@@ -21,7 +21,7 @@ def get_urls_long(product, collection, start, stop, bbox, day, night):
         urls += get_urls(product=product, collection=collection, 
                          start=iterator, stop=iterator+step, bbox=bbox, day=day, night=night)
         iterator += step
-    urls += get_urls(product=product, collection=collection, start=iterator, stop=stop, bbox=bbox)    
+    urls += get_urls(product=product, collection=collection, start=iterator, stop=stop, bbox=bbox, day=day, night=night)    
     return urls
 
 
@@ -48,7 +48,7 @@ def get_urls(product, collection, start, stop, bbox, day=False, night=False):
             print('retrying')
             time.sleep(1)
             n_tries += 1
-            if n_try == 3:
+            if n_tries == 3:
                 print('tried 3 times; giving up')
                 return []            
         else: 
