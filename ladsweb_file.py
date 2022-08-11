@@ -47,12 +47,12 @@ class LadswebFile:
             self.url = url
         else:
             self.get_url()
-        self.get_file_name()        
+        self.get_file_name()
         self.checksum = None
         self.header = None
         self.properties = {}
 
-    def get_url(self):        
+    def get_url(self):
         api = 'https://modwebsrv.modaps.eosdis.nasa.gov/axis2/services/MODAPSservices/getFileUrls?'
         query = 'fileIds={file_id}'.format(file_id=self.file_id)
         ret = requests.get(api+query)
@@ -68,7 +68,7 @@ class LadswebFile:
         for child in root[0]:
             key = child.tag.split('}')[1]
             value = child.text
-            self.properties[key] = value     
+            self.properties[key] = value
 
     def download_properties(self):
         api = 'https://modwebsrv.modaps.eosdis.nasa.gov/axis2/services/MODAPSservices/getFileProperties?'
@@ -76,8 +76,8 @@ class LadswebFile:
         ret = requests.get(api+query)
         while not ret.status_code == 200:
             print('{code} - failed to download properties. Retrying'.format(code=ret.status_code))
-            time.sleep(1)                            
-            ret = requests.get(api+query)            
+            time.sleep(5)
+            ret = requests.get(api+query)
         return ret
 
     def get_header(self):
@@ -87,22 +87,22 @@ class LadswebFile:
     def file_size(self):
         if self.header is None:
             self.get_header()
-        return int(self.header['content-length'])         
+        return int(self.header['content-length'])
 
-    def download_chunk_urllib(self, ranges):        
+    def download_chunk_urllib(self, ranges):
         req = urllib.request.Request(self.url)
-        req.headers['Range'] = 'bytes=%s-%s' % (ranges[0], ranges[1])        
+        req.headers['Range'] = 'bytes=%s-%s' % (ranges[0], ranges[1])
         return urllib.request.urlopen(req).read()
 
     def download_chunk_requests(self, ranges):
-        headers = {'Range': 'bytes=%d-%d' % (ranges[0], ranges[1])} 
-        r = session.get(self.url, headers=headers, stream=True) 
-        return r.content        
- 
-    def download_parallel(self, threads=4):        
-        chunk_size = int(self.file_size() / threads ) + 1   
+        headers = {'Range': 'bytes=%d-%d' % (ranges[0], ranges[1])}
+        r = session.get(self.url, headers=headers, stream=True)
+        return r.content
+
+    def download_parallel(self, threads=4):
+        chunk_size = int(self.file_size() / threads ) + 1
         ranges = []
-        for start in range(0, self.file_size(), chunk_size):    
+        for start in range(0, self.file_size(), chunk_size):
             end = start + chunk_size-1
             ranges.append((start, end))
         with Pool(threads) as p:
@@ -148,20 +148,20 @@ class LadswebFile:
             self.download(folder)
         while not self.checksum_is_correct():
             print('Checksums dont match. Retrying Download')
-            time.sleep(1)
-            self.delete()            
+            time.sleep(5)
+            self.delete()
             self.download(folder)
-            
+
     def checksum_is_correct(self):
         self.calc_checksum()
         checksum_local = self.checksum
-        checksum_properties = int(self.properties['checksum'])        
+        checksum_properties = int(self.properties['checksum'])
         return checksum_local==checksum_properties
-        
+
     def calc_checksum(self):
-        ret = subprocess.check_output(['cksum', self.file_path])        
+        ret = subprocess.check_output(['cksum', self.file_path])
         self.checksum = int(ret.split()[0])
-        
+
     def already_downloaded(self, folder):
         self.file_path = folder + '/' + self.file_name
         if os.path.isfile(self.file_path):
