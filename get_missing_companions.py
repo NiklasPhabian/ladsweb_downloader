@@ -9,6 +9,7 @@ import fnmatch
 import xml
 import xml.etree.ElementTree as ET
 import argparse
+import lib
 
 
 def get_granule_paths(granule_folder, granule_pattern, filter_term=None):
@@ -23,20 +24,8 @@ def get_companion_paths(companion_folder, companion_pattern):
     return companion_paths
 
 
-def paths2stumps(paths):
-    stumps = []
-    for path in paths:
-        name = path.split('/')[-1]     
-        name_parts = name.split('.')
-        date = name_parts[1]
-        time = name_parts[2]    
-        stump = date + '.' + time
-        stumps.append(stump)
-    return stumps
-
-
 def get_lonely_granules(granule_paths, companion_paths):
-    granule_stumps = paths2stumps(granule_paths)
+    granule_stumps = lib.paths2stumps(granule_paths)
     companion_stumps = paths2stumps(companion_paths)
     missing_stumps = list(set(granule_stumps) - set(companion_stumps))
     return missing_stumps
@@ -94,7 +83,7 @@ if __name__ == '__main__':
         print(parser.print_help())
         quit()
         
-    granule_paths = get_granule_paths(granule_folder=args.granule_folder, 
+    granule_paths = lib.get_granule_paths(granule_folder=args.granule_folder, 
                                       granule_pattern=args.granule_pattern, 
                                       filter_term=args.filter_term)
             

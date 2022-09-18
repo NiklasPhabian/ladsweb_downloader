@@ -4,3 +4,4 @@ pytz>=2020.1
 requests>=2.24.0
 urllib3>=1.26.5
 wget>=3.2
+pandas

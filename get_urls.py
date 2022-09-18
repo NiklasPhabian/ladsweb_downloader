@@ -41,7 +41,14 @@ def get_urls(product, collection, start, stop, bbox, day=False, night=False):
     success = False
     n_tries = 0
     while not success:
-        ret = requests.get(host+api+query, headers={'X-Requested-With': 'XMLHttpRequest'}, timeout=120)
+        try:
+            ret = requests.get(host+api+query, headers={'X-Requested-With': 'XMLHttpRequest'}, timeout=120)
+        except Exception as e:
+            print(e)
+            print('network error trying again')
+            time.sleep(10)
+            continue
+        
         if ret.status_code!=200 or len(ret.json()) == 0:
             print('empty response; flasely specified arguments? timeout?')
             print('Status Code: {}'.format(ret.status_code))

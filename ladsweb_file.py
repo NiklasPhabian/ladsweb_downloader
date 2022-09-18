@@ -54,7 +54,7 @@ class LadswebFile:
 
     def get_url(self):
         api = 'https://modwebsrv.modaps.eosdis.nasa.gov/axis2/services/MODAPSservices/getFileUrls?'
-        query = 'fileIds={file_id}'.format(file_id=self.file_id)
+        query = 'fileIds={file_id}'.format(file_id=self.file_id)        
         ret = requests.get(api+query)
         root = ET.fromstring(ret.text)
         self.url = root[0].text
@@ -73,11 +73,17 @@ class LadswebFile:
     def download_properties(self):
         api = 'https://modwebsrv.modaps.eosdis.nasa.gov/axis2/services/MODAPSservices/getFileProperties?'
         query = 'fileIds={file_id}'.format(file_id=self.file_id)
-        ret = requests.get(api+query)
-        while not ret.status_code == 200:
-            print('{code} - failed to download properties. Retrying'.format(code=ret.status_code))
-            time.sleep(5)
+        try:
             ret = requests.get(api+query)
+            while not ret.status_code == 200:
+                print('{code} - failed to download properties. Retrying'.format(code=ret.status_code))
+                time.sleep(5)
+                ret = requests.get(api+query)
+        except Exception as e:
+            print(e)
+            print('download properties failed, trying again')
+            time.sleep(2)
+            ret = self.download_properties()
         return ret
 
     def get_header(self):
@@ -156,7 +162,7 @@ class LadswebFile:
         self.calc_checksum()
         checksum_local = self.checksum
         checksum_properties = int(self.properties['checksum'])
-        return checksum_local==checksum_properties
+        return checksum_local == checksum_properties
 
     def calc_checksum(self):
         ret = subprocess.check_output(['cksum', self.file_path])
@@ -165,8 +171,13 @@ class LadswebFile:
     def already_downloaded(self, folder):
         self.file_path = folder + '/' + self.file_name
         if os.path.isfile(self.file_path):
-            print('file already downloaded. Skipping')
-            return True
+            print('file already downloaded.')
+            if self.checksum_is_correct():
+                print('... and checksums match. Skipping')
+                return True
+            else:
+                print('.. but checksums dont not match; downloading again')
+                return False
         else:
             return False
 
