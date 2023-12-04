@@ -26,7 +26,7 @@ def get_companion_paths(companion_folder, companion_pattern):
 
 def get_lonely_granules(granule_paths, companion_paths):
     granule_stumps = lib.paths2stumps(granule_paths)
-    companion_stumps = paths2stumps(companion_paths)
+    companion_stumps = lib.paths2stumps(companion_paths)
     missing_stumps = list(set(granule_stumps) - set(companion_stumps))
     return missing_stumps
                           

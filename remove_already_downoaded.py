@@ -31,8 +31,9 @@ if __name__ == '__main__':
     existing_stumps = lib.paths2stumps(existing_paths)    
     existing = pandas.DataFrame({'existing_stumps': existing_stumps})
     
-    merged = pandas.merge(remote, existing, left_on='remote_stumps', right_on='existing_stumps', how='outer', indicator=True)
-    missing = merged[merged['_merge']=='left_only']
-    
+    merged = pandas.merge(remote, existing, left_on='remote_stumps', right_on='existing_stumps', how='outer', indicator=True)        
+    missing = merged[merged['_merge']=='left_only'].reset_index()
+    missing['id'] = missing['id'].astype(int)
+        
     out_file = args.file_list.split('.csv')[0]+'_missing.csv'    
     missing[['id', 'url', 'n']].to_csv(out_file, header=False, index=False)

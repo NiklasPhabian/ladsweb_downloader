@@ -26,6 +26,7 @@ def get_urls_long(product, collection, start, stop, bbox, day, night):
 
 
 def get_urls(product, collection, start, stop, bbox, day=False, night=False):
+    product = product.upper()
     host = 'https://ladsweb.modaps.eosdis.nasa.gov'
     api = '/api/v1/files/'
     query = 'product={product}&collection={collection}&'\
